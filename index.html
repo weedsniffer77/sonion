@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>singleplayer test</title>
+    <link rel="icon" href="data:,">
+    
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="src/ui/css/core.css">
+    <link rel="stylesheet" href="src/ui/css/hud.css">
+    <link rel="stylesheet" href="src/ui/css/menus.css">
+    <link rel="stylesheet" href="src/ui/css/settings.css">
+    <link rel="stylesheet" href="src/ui/css/loadout.css">
+    <link rel="stylesheet" href="src/ui/css/score_feed.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Teko:wght@300;400;600&family=Orbitron:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+    </style>
+</head>
+<body>
+
+    <!-- Canvases -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- UI IS INJECTED BY SCRIPTS (ui_elements.js) -->
+
+    <!-- THREE.JS & RAPIER IMPORT MAP -->
+    <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+        "three-mesh-bvh": "https://unpkg.com/three-mesh-bvh@0.7.3/build/index.module.js",
+        "@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.11.2/+esm"
+      }
+    }
+    </script>
+    
+    <!-- CORE LIBS LOADER -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+        import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+        import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+        import RAPIER from '@dimforge/rapier3d-compat';
+        
+        import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
+        import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+        // Init Rapier WASM
+        await RAPIER.init();
+        window.RAPIER = RAPIER; // Expose globally for legacy scripts
+
+        THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+        THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+        THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
+        window.THREE = THREE;
+        window.EffectComposer = EffectComposer;
+        window.RenderPass = RenderPass;
+        window.ShaderPass = ShaderPass;
+        window.UnrealBloomPass = UnrealBloomPass;
+        window.OutputPass = OutputPass;
+        window.BokehPass = BokehPass;
+        window.SSAOPass = SSAOPass;
+        window.BufferGeometryUtils = BufferGeometryUtils;
+        
+        window.CORE_LIBS_LOADED = true;
+    </script>
+
+    <!-- CORE ARCHITECTURE -->
+    <script src="src/core/world_builder.js"></script>
+    <script src="src/core/physics_engine.js"></script> 
+    <script src="src/core/entity_manager.js"></script>
+    <script src="src/systems/loot_system.js"></script>
+    
+    <script src="src/core/singleplayer_compat.js"></script>
+    <script src="src/core/player_actions_broadcaster.js"></script>
+
+    <!-- GAME SCRIPTS -->
+    <script src="src/ui/ui_elements.js"></script>
+    <script src="src/core/background_service.js"></script>
+    <script src="src/core/input_manager.js"></script>
+    <script src="src/core/asset_loader.js"></script>
+    <script src="src/player/inventory_controller.js"></script>
+    
+    <!-- Scene & Render -->
+    <script src="src/render/material_library.js"></script>
+    <script src="src/render/shader/custom_shaders.js"></script>
+    <script src="src/render/shader/post_effects_library.js"></script>
+    <script src="src/render/shader/shadow_manager.js"></script>
+    <script src="src/render/shader/raytracer.js"></script>
+    <script src="src/render/shader/sky_renderer.js"></script>
+    <script src="src/render/shader/post_processor.js"></script>
+    <script src="src/render/gun_animator.js"></script>
+    
+    <script src="src/render/gun_attachment_system.js"></script>
+    <script src="src/render/gun_fx_system.js"></script>
+    <script src="src/render/gun_renderer.js"></script>
+    
+    <script src="src/data/game_data.js"></script>
+    <script src="src/data/score_events.js"></script>
+    <script src="src/data/common_parts.js"></script>
+    <script src="src/effects/spawned_effects/particles.js"></script>
+    <script src="src/effects/visual_effects/vfx_config.js"></script>
+    
+    <script src="src/core/stat_system.js"></script>
+    <script src="src/core/loadout_manager.js"></script>
+    <script src="src/core/score_system.js"></script>
+    
+    <script src="src/ui/scoreboard_manager.js"></script>
+    <script src="src/ui/settings_manager.js"></script>
+    <script src="src/core/ui_manager.js"></script>
+    
+    <!-- Data Loaders -->
+    <script src="src/data/weapon_registry.js"></script>
+    <script src="src/data/throwable_registry.js"></script>
+    <script src="src/environment/map.js"></script>
+    <script src="src/environment/environment_interactions.js"></script>
+    <script src="src/environment/environment_manager.js"></script>
+    
+    <!-- SPLIT: Player Logic -->
+    <script src="src/player/modules/player_health.js"></script>
+    <script src="src/player/modules/player_ammo.js"></script>
+    <script src="src/player/player_state.js"></script>
+    
+    <script src="src/player/physics_controller.js"></script>
+    <script src="src/player/character_controller.js"></script>
+    <script src="src/player/player_camera.js"></script>
+    <script src="src/player/death_camera_controller.js"></script>
+    
+    <!-- SPLIT: Visuals -->
+    <script src="src/effects/spawned_effects/particles_core.js"></script>
+    <script src="src/effects/spawned_effects/particles_vfx.js"></script>
+    <script src="src/effects/spawned_effects/particle_manager.js"></script>
+    <script src="src/entities/dropped/loot_visuals.js"></script>
+    <script src="src/entities/player_model_builder.js"></script>
+    <script src="src/systems/ragdoll_manager.js"></script>
+    
+    <script src="src/weapons/ballistics.js"></script>
+    
+    <!-- INPUT HANDLERS (New) -->
+
+    <script src="src/weapons/weapon_input_handler.js"></script>
+    
+    <script src="src/weapons/weapon_manager.js"></script>
+    <script src="src/weapons/throwable_manager.js"></script>
+    <script src="src/weapons/projectile_manager.js"></script>
+    
+    <script src="src/ui/hud/basic_hud.js"></script>
+    <script src="src/ui/hud/rifle_hud.js"></script>
+    <script src="src/ui/hud/right_side_hud.js"></script>
+    <script src="src/ui/hud/hud_manager.js"></script>
+    
+    <script src="src/ui/nametag_system.js"></script>
+    <script src="src/ui/hitmarker_system.js"></script>
+    <script src="src/ui/damage_indicator.js"></script>
+    <script src="src/ui/damage_numbers.js"></script>
+    <script src="src/ui/score_feed_ui.js"></script>
+    <script src="src/ui/ammo_feed_ui.js"></script> 
+    
+    <!-- First-person Arm Animations -->
+    <script src="src/entities/remote_player_animator.js"></script>
+    
+    <!-- ASSETS SPLIT (Unused - Cleared) -->
+    
+    <!-- SPLIT: Gameplay Waves & Enemies -->
+    <script src="src/data/enemy_registry.js"></script>
+    <script src="src/systems/waves/waves.js"></script>
+    <script src="src/systems/waves/spawn_coordinator.js"></script>
+    <script src="src/systems/waves/wave_ui.js"></script>
+    <script src="src/systems/damage_handler.js"></script>
+    <script src="src/systems/waves/wave_manager.js"></script>
+
+    <!-- SPLIT: Core Game Manager -->
+    <script src="src/core/game_setup.js"></script>
+    <script src="src/core/game_flow.js"></script>
+    <script src="src/core/game_manager.js"></script>
+    
+
+
+    <!-- SIMPLE BOOT SEQUENCE -->
+    <script>
+        function attemptStart() {
+            // 1. Check Libraries
+            if (!window.CORE_LIBS_LOADED || !window.THREE || !window.RAPIER) {
+                setTimeout(attemptStart, 100);
+                return;
+            }
+            
+            // 2. Check Game Manager
+            if (!window.TacticalShooter || !window.TacticalShooter.GameManager) {
+                setTimeout(attemptStart, 100);
+                return;
+            }
+            
+            // 3. Start
+            console.log("Boot: Starting Game Manager...");
+            window.TacticalShooter.GameManager.init();
+        }
+        
+        window.addEventListener('load', attemptStart);
+    </script>
+</body>
+</html>
